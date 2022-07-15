@@ -1,9 +1,10 @@
 mod lib;
 
 use lib::Roll;
+use stats;
 
-// iteration 1: read in a file, add up all the rolls naiively
-// iteration 2: mean/median/std deviation
+// (DONE) iteration 1: read in a file, add up all the rolls naiively
+// (DONE) iteration 2: mean/median/std deviation
 // iteration 3: get the proper score
 // iteration 4: let's get concurrent!
 
@@ -25,5 +26,12 @@ fn main() {
         })
         .collect();
 
-    println!("hey there! {:?}, {}", &naiive_scores, &naiive_scores.len());
+    println!("hey there!, some info for ya:");
+    println!("number of games: {}", &naiive_scores.len());
+    println!(
+        "mean, median, and standard deviation: {:?}, {:?}, and {:?} respectively",
+        stats::mean(naiive_scores.iter().cloned()),
+        stats::median(naiive_scores.iter().cloned()).unwrap(),
+        stats::stddev(naiive_scores.iter().cloned())
+    );
 }
