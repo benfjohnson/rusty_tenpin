@@ -1,6 +1,5 @@
 mod lib;
 
-use lib::Roll;
 use stats;
 
 // (DONE) iteration 1: read in a file, add up all the rolls naiively
@@ -12,26 +11,15 @@ fn main() {
     let games = lib::file_to_games("./data.csv");
 
     // convert the rolls into a vector of (naiive) scores
-    let naiive_scores: Vec<i32> = games
-        .iter()
-        .map(|rolls| {
-            rolls.iter().fold(0, |sum, roll| {
-                let score = match roll {
-                    Roll::Knockdown(digit) => *digit,
-                    _ => 10,
-                };
-
-                sum + score
-            })
-        })
-        .collect();
+    let scores: Vec<i32> = games.iter().map(lib::score_game).collect();
 
     println!("hey there!, some info for ya:");
-    println!("number of games: {}", &naiive_scores.len());
+    println!("number of games: {}", &scores.len());
     println!(
         "mean, median, and standard deviation: {:?}, {:?}, and {:?} respectively",
-        stats::mean(naiive_scores.iter().cloned()),
-        stats::median(naiive_scores.iter().cloned()).unwrap(),
-        stats::stddev(naiive_scores.iter().cloned())
+        stats::mean(scores.iter().cloned()),
+        stats::median(scores.iter().cloned()).unwrap(),
+        stats::stddev(scores.iter().cloned())
     );
+    println!("SCORES: {:?}", scores);
 }
