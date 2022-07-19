@@ -1,6 +1,6 @@
 use std::fs;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Roll {
     Knockdown(i32),
     Strike,
@@ -36,6 +36,7 @@ fn str_to_game(game_str: &str) -> Game {
 pub fn file_to_games(file: &str) -> Vec<Vec<Roll>> {
     // read in game file, and filter out the last line which doesn't contain any content
     let file_str = fs::read_to_string(file).expect("Bad filename given");
+
     file_str
         .split("\n")
         .filter(|g| g.contains(","))
@@ -43,6 +44,7 @@ pub fn file_to_games(file: &str) -> Vec<Vec<Roll>> {
         .collect()
 }
 
+// given active "bonus rolls" not yet consumed (max 2), use with the latest roll score
 fn use_bonus_rolls(bonuses: (i32, i32), score: &i32) -> ((i32, i32), i32) {
     let mut points = *score;
     let mut new_bs = (bonuses.0, bonuses.1);
@@ -59,6 +61,7 @@ fn use_bonus_rolls(bonuses: (i32, i32), score: &i32) -> ((i32, i32), i32) {
     (new_bs, points)
 }
 
+// if roll was a strike or spare, add to current bonus rolls accordingly
 fn add_bonus_rolls(bonuses: (i32, i32), roll: &Roll) -> (i32, i32) {
     let ret_bonus = bonuses;
     match roll {
@@ -80,6 +83,7 @@ fn add_bonus_rolls(bonuses: (i32, i32), roll: &Roll) -> (i32, i32) {
     }
 }
 
+// given roll, plus active bonus rolls not used, score it!
 fn calc_roll_points(bonuses: (i32, i32), roll: &Roll) -> ((i32, i32), i32) {
     match roll {
         Roll::Knockdown(score) => use_bonus_rolls(bonuses, score),
@@ -93,10 +97,10 @@ fn calc_roll_points(bonuses: (i32, i32), roll: &Roll) -> ((i32, i32), i32) {
 
 // algo:
 // can only have two bonuses in play at once (by third strike, first strike no longer
-// has bonus rolls left
+// has bonus rolls left)
 // * keep a map of two (or fewer) active bonuses
 // * when a strike or spare happens, update it.
-// * on any roll, take those bonus points and add to score
+// * on any roll, take those bonus points and add to score of the roll
 pub fn score_game(game: &Vec<Roll>) -> i32 {
     let mut bonus_rolls: (i32, i32) = (0, 0);
     game.iter().fold(0, |sum, roll| {
